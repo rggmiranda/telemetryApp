@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Telemetry App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body class="container mt-5">
+<div class="container">
+    <h3>Device Directory</h3>
+    <hr>
+    <table class="table table--bordered table-striped">
+        <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th th:if="${roles.contains('ROLE_ADMIN')}">User</th>
+            <th>Sensors</th>
+            <th>Operations</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="tempDevice : ${devices}">
+            <div th:if="${(((tempDevice.userName == userName)&& !roles.contains('ROLE_ADMIN'))|| roles.contains('ROLE_ADMIN'))}">
+                <td th:text="${tempDevice.name}"/>
+                <td th:if="${roles.contains('ROLE_ADMIN')}" th:text="${tempDevice.userName}"/>
+                <td>
+                    <div class="container">
+                        <a th:each="sensor : ${tempDevice.sensors}">
+                            <a th:href="@{/gui/telemetries(deviceId=${tempDevice.id},sensorId=${sensor.id})}"
+                               class="btn btn-primary btn-sm mb-3"
+                               th:text="${sensor.name}">
+                            </a>
+                        </a>
+                    </div>
+                </td>
+                <td>
+                    <div class="container">
+                        <a th:href="@{/gui/devices/modifyDevice(deviceId=${tempDevice.id})}"
+                           class="btn btn-primary btn-sm mb-3">
+                            Edit
+                        </a>
+                        <a th:href="@{/gui/devices/removeDevice(deviceId=${tempDevice.id})}"
+                           class="btn btn-primary btn-sm mb-3">
+                            Delete
+                        </a>
+                    </div>
+                </td>
+            </div>
+        </tr>
+        </tbody>
+    </table>
+    <div class="container mb-3">
+        <a th:href="@{/gui/devices/newDevice}"
+           class="btn btn-primary btn-sm mb-3">
+            Add Device
+        </a>
+        <a th:href="@{/gui/home}"
+           class="btn btn-primary btn-sm mb-3">
+            Back to home
+        </a>
+    </div>
+</div>
+</body>
+</html>

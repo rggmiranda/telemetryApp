@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Telemetry App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body class="container mt-5">
+    <div class="container">
+            <h3>Telemetries</h3>
+        <span>SensorId: </span>
+        <span th:text="${sensorId}"></span>
+        <hr>
+
+        <div id="data-container"></div>
+        <table class="table table--bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody id="table">
+            </tbody>
+        </table>
+        <div class="container mb-3">
+            <a th:href="@{/gui/devices/deviceList}"
+               class="btn btn-primary btn-sm mb-3">
+                Back to devices list
+            </a>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        const deviceId = /*[[${deviceId}]]*/
+        const sensorId = /*[[${sensorId}]]*/
+        const eventSource = new EventSource('/api/telemetry-stream?deviceId='+deviceId+'&sensorId='+sensorId);
+
+        eventSource.onmessage = function (event) {
+            const dataContainer = document.getElementById('table');
+            var jsonData = JSON.parse(event.data);
+            console.log(deviceId);
+            console.log(sensorId);
+
+            dataContainer.innerHTML ="";
+            for(var i = 0; i<jsonData.length; i++){
+            const rawDate = "2024-03-09T02:54:56.755Z";
+                const dateObject = new Date(jsonData[i].timestamp);
+                const formattedDate = `${dateObject.getFullYear()}-${(dateObject.getMonth() + 1).toString().padStart(2, '0')}-${dateObject.getDate().toString().padStart(2, '0')}  ${dateObject.getHours().toString().padStart(2, '0')}:${dateObject.getMinutes().toString().padStart(2, '0')}:${dateObject.getSeconds().toString().padStart(2, '0')}`;
+
+                dataContainer.innerHTML = dataContainer.innerHTML + "<tr><td>"+ formattedDate +"</td><td>"+ jsonData[i].value +"</td></tr>";
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Telemetry App</title>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    />
+    <style>
+        .error {
+          color: red;
+        }
+        .col-md-6 {
+          margin: auto; /* Center alignment */
+          width: 50%; /* Adjust width as needed */
+        }
+    </style>
+</head>
+<body class="container mt-5">
+    <div class="col-md-6">
+        <span th:if="${sensor.id}!=null">
+            <h2>Modify sensor</h2>
+        </span>
+        <span th:if="${sensor.id}==null">
+            <h2>Create new sensor</h2>
+        </span>
+        <h2>Creatasfdasdfe sensor</h2>
+        <div class="container mb-3">
+            <form action="#" th:object="${sensor}" th:action="@{/gui/devices/addSensor}" method="POST">
+                <input type="hidden" th:field="*{id}"/>
+                <input type="hidden" th:field="*{device.id}"/>
+                <input type="hidden" id="sensorTypeInputId" th:field="*{sensorType.id}"/>
+                <input type="hidden" id="sensorTypeInput" th:field="*{sensorType.name}"/>
+                <div class="mb-3">
+                    <label for="sensorName" class="form-label">Sensor Name:</label>
+                    <input
+                            id="sensorName"
+                            name="sensorName"
+                            th:field="*{name}"
+                            class="form-control"
+                            required
+                    />
+                    <span
+                            id="sensorNameError"
+                            th:if="${sensorNameError!=''}"
+                            th:text="${sensorNameError}"
+                            class="error"
+                    ></span>
+                </div>
+                <div class="mb-3">
+                    <div class="dropdown">
+                        <button
+                                class="btn btn-secondary dropdown-toggle"
+                                type="button"
+                                id="dropdownMenuButton"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                        >
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li th:each="tempSensorType : ${sensorTypes}">
+                                <a class="dropdown-item" href="#"
+                                   th:text="${tempSensorType}" th:attr="data-id=${tempSensorType.id}" onclick="changeText(this)">
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <button
+                        type="submit"
+                        id="submitButton"
+                        class="btn btn-primary"
+                        style="width: 100%"
+                        disabled
+                >
+                    Save
+                </button>
+            </form>
+        </div>
+        <div th:if="${sensor.id}!=null" class="container mb-3">
+            <p class="text-center ">
+                <input type="hidden" th:object="${sensor}" th:field="*{device.id}"/>
+                <input type="hidden" th:object="${sensor}" th:field="*{name}"/>
+                <a class="btn btn-danger" th:object="${sensor}"
+                   th:href="@{/gui/devices/removeSensor(deviceId=*{device.id},sensorName=*{name})}" style="width:100%">Delete sensor</a>
+            </p>
+        </div>
+        <div class="container mb-3">
+            <p class="text-center ">
+                <input type="hidden" th:object="${sensor}" th:field="*{device.id}"/>
+                <a id="back" class="btn btn-primary" th:object="${sensor}"
+                   th:href="@{/gui/devices/modifyDevice(deviceId=*{device.id})}" style="width:25%">Back</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        var nameInput = document.getElementById('sensorName');
+        var nameError = document.getElementById('sensorNameError');
+        var sensorTypeDropdown = document.getElementById('dropdownMenuButton');
+        var currentSensorTypeValue = document.getElementById('sensorTypeInput');
+
+        var submitButton = document.getElementById('submitButton');
+
+        function loadPage(){
+          var sensorType = currentSensorTypeValue.value;
+          if(sensorType===""){
+            sensorTypeDropdown.innerHTML = "Sensor type"
+          }else{
+          sensorTypeDropdown.innerHTML = sensorType
+          }
+        }
+
+        function validateName() {
+          var name = nameInput.value;
+          var sensorType = sensorTypeDropdown.innerHTML;
+
+          submitButton.disabled = true;
+
+          if (name.length > 0 && name.length < 4) {
+            nameError.textContent = 'Must be at least 4 characters long';
+          } else {
+            nameError.textContent = '';
+          }
+
+          if (name.length >= 4 && !sensorType.includes("Sensor type")) {
+            submitButton.disabled = false;
+          }
+        }
+
+        window.addEventListener('load', loadPage);
+        nameInput.addEventListener('input', validateName);
+        sensorTypeDropdown.addEventListener('hidden.bs.dropdown', validateName);
+        window.addEventListener('load', validateName);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function changeText(selectedItem) {
+            var dropdownButton = document.getElementById('dropdownMenuButton');
+            dropdownButton.innerHTML = selectedItem.innerHTML;
+            var hiddenInput = document.getElementById('sensorTypeInput');
+            hiddenInput.value = selectedItem.innerHTML;
+            var hiddenInputId = document.getElementById('sensorTypeInputId');
+            hiddenInputId.value = selectedItem.getAttribute('data-id')
+        }
+    </script>
+</body>
+</html>
